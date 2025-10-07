@@ -1,0 +1,138 @@
+openapi: 3.1.0
+info:
+  title: PartnerAPI - Auth Endpoints
+  version: 1.0.0
+servers:
+  - url: https://partner.prizma.tools
+    description: Base URL for all API requests
+paths:
+  /auth/auth-link:
+    get:
+      tags:
+      - authenticate
+      summary: Get Auth Link
+      operationId: get_auth_link_auth_auth_link_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: external_id
+        in: query
+        required: true
+        schema:
+          type: integer
+          title: External Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: string
+                title: Response Get Auth Link Auth Auth Link Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/check-partner:
+    get:
+      tags:
+      - authenticate
+      summary: Partner User Check Partner
+      operationId: partner_user_check_partner_auth_check_partner_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: external_id
+        in: query
+        required: true
+        schema:
+          type: integer
+          title: External Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IsPartnerIntegrationExist'
+        '400':
+          content:
+            application/json:
+              example:
+                detail: Partner title incorrect or does not exist
+              schema:
+                $ref: '#/components/schemas/ErrorSchema'
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                partner_not_found:
+                  summary: Партнер не найден
+                  value:
+                    detail: Partner with id=123 not found
+              schema:
+                $ref: '#/components/schemas/ErrorSchema'
+          description: Not Found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  securitySchemes:
+    HTTPBearer:
+      type: http
+      scheme: bearer
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    IsPartnerIntegrationExist:
+      properties:
+        is_integration_exist:
+          type: boolean
+          title: Is Integration Exist
+      type: object
+      required:
+      - is_integration_exist
+      title: IsPartnerIntegrationExist
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ErrorSchema:
+      properties:
+        detail:
+          type: string
+          title: Detail
+      type: object
+      required:
+      - detail
+      title: ErrorSchema

@@ -1,5 +1,5 @@
 ---
-order: 3
+order: 2
 title: Аутентификация (auth)
 ---
 
@@ -67,4 +67,4 @@ title: Аутентификация (auth)
 
 ---
 
-[openapi:./auth.yaml:false]
+[openapi:./partner_auth.yaml:false]
