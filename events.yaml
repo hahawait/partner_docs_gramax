@@ -1,0 +1,237 @@
+openapi: 3.1.0
+info:
+  title: PartnerAPI
+  version: 1.0.0
+servers: []
+paths:
+  /events/sub:
+    get:
+      tags:
+      - events
+      summary: Get Sub Events
+      operationId: get_sub_events_events_sub_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: Offset
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          title: Limit
+      - name: channels_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: array
+            items:
+              type: integer
+          - type: 'null'
+          title: Channels Id
+      - name: date_gte
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date-time
+          example: '2025-03-18 08:00:10'
+          title: Date Gte
+      - name: date_lte
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+          example: '2025-03-18 08:30:10'
+          title: Date Lte
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListPaginatedResponse_EventOut_'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/unsub:
+    get:
+      tags:
+      - events
+      summary: Get Unsub Events
+      operationId: get_unsub_events_events_unsub_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: Offset
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          title: Limit
+      - name: channels_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: array
+            items:
+              type: integer
+          - type: 'null'
+          title: Channels Id
+      - name: date_gte
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date-time
+          example: '2025-03-18 08:00:10'
+          title: Date Gte
+      - name: date_lte
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+          example: '2025-03-18 08:30:10'
+          title: Date Lte
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListPaginatedResponse_EventOut_'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  securitySchemes:
+    HTTPBearer:
+      type: http
+      scheme: bearer
+  schemas:
+    ListPaginatedResponse_EventOut_:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/EventOut'
+          type: array
+          title: Items
+        pagination:
+          $ref: '#/components/schemas/PaginationOut'
+      type: object
+      required:
+      - items
+      - pagination
+      title: ListPaginatedResponse[EventOut]
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    PaginationOut:
+      properties:
+        offset:
+          type: integer
+          title: Offset
+        limit:
+          type: integer
+          title: Limit
+        total:
+          type: integer
+          title: Total
+      type: object
+      required:
+      - offset
+      - limit
+      - total
+      title: PaginationOut
+    EventOut:
+      properties:
+        oid:
+          type: string
+          title: Oid
+        channel_id:
+          type: integer
+          title: Channel Id
+        user_id:
+          type: integer
+          title: User Id
+        event_status:
+          type: string
+          title: Event Status
+        invite_link:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Invite Link
+        is_premium:
+          type: integer
+          title: Is Premium
+        is_username:
+          type: integer
+          title: Is Username
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - oid
+      - channel_id
+      - user_id
+      - event_status
+      - invite_link
+      - is_premium
+      - is_username
+      - created_at
+      title: EventOut
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
