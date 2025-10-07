@@ -93,4 +93,4 @@ title: Каналы (channels)
 
 ---
 
-[openapi:./partner_channels.yaml:false]
+[openapi:./channels.yaml:false]
