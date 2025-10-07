@@ -1,0 +1,141 @@
+openapi: 3.1.0
+info:
+  title: PartnerAPI
+  version: 1.0.0
+servers: []
+paths:
+  /channels:
+    get:
+      tags:
+      - channels
+      summary: Get Channels
+      operationId: get_channels_channels_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ChannelSchemaOut'
+                type: array
+                title: Response Get Channels Channels Get
+      security:
+      - HTTPBearer: []
+    post:
+      tags:
+      - channels
+      summary: Add Channels
+      operationId: add_channels_channels_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/ChannelSchemaIn'
+              type: array
+              title: Channels In
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddChannelsResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - HTTPBearer: []
+components:
+  securitySchemes:
+    HTTPBearer:
+      type: http
+      scheme: bearer
+  schemas:
+    ChannelSchemaIn:
+      properties:
+        channel_id:
+          type: integer
+          title: Channel Id
+        event_type:
+          $ref: '#/components/schemas/EventType'
+      type: object
+      required:
+      - channel_id
+      - event_type
+      title: ChannelSchemaIn
+    ChannelSchemaOut:
+      properties:
+        channel_id:
+          type: integer
+          title: Channel Id
+        event_type:
+          $ref: '#/components/schemas/EventType'
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - channel_id
+      - event_type
+      - created_at
+      title: ChannelSchemaOut
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    AddChannelsResponse:
+      properties:
+        successfully_added_channels:
+          items:
+            type: integer
+          type: array
+          title: Successfully Added Channels
+        not_added_channels:
+          items:
+            type: integer
+          type: array
+          title: Not Added Channels
+      type: object
+      required:
+      - successfully_added_channels
+      - not_added_channels
+      title: AddChannelsResponse
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    EventType:
+      type: string
+      enum:
+      - add
+      - remove
+      title: EventType
