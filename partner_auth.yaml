@@ -2,10 +2,71 @@ openapi: 3.1.0
 info:
   title: PartnerAPI - Auth Endpoints
   version: 1.0.0
-servers:
-  - url: https://partner.prizma.tools
-    description: Base URL for all API requests
+servers: []
 paths:
+  /auth/registration:
+    post:
+      tags:
+      - authenticate
+      summary: Регистрация нового партнера
+      description: Возвращает созданного партнера
+      operationId: registration_auth_registration_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePartnerDTO'
+        required: true
+      responses:
+        '201':
+          description: Партнер успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePartnerResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/token:
+    post:
+      tags:
+      - authenticate
+      summary: Создание партнерского токена
+      operationId: create_token_auth_token_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePartnerTokenDTO'
+        required: true
+      responses:
+        '200':
+          description: Токен успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerTokenDTO'
+        '404':
+          description: Запись Partner не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorSchema'
+        '409':
+          description: Некорректный ключ аутентификации.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /auth/auth-link:
     get:
       tags:
@@ -29,6 +90,67 @@ paths:
               schema:
                 type: string
                 title: Response Get Auth Link Auth Auth Link Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/connect:
+    post:
+      tags:
+      - authenticate
+      summary: Connect Partner User
+      operationId: connect_partner_user_auth_connect_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: external_id
+        in: query
+        required: true
+        schema:
+          type: integer
+          title: External Id
+      - name: account_id
+        in: query
+        required: true
+        schema:
+          type: integer
+          title: Account Id
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseSchema'
+        '400':
+          content:
+            application/json:
+              example:
+                detail: Partner title incorrect or does not exist
+              schema:
+                $ref: '#/components/schemas/ErrorSchema'
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                partner_not_found:
+                  summary: Партнер не найден
+                  value:
+                    detail: Partner with id=123 not found
+              schema:
+                $ref: '#/components/schemas/ErrorSchema'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              example:
+                detail: Account already exists
+              schema:
+                $ref: '#/components/schemas/ErrorSchema'
+          description: Conflict
         '422':
           description: Validation Error
           content:
@@ -88,6 +210,55 @@ components:
       type: http
       scheme: bearer
   schemas:
+    ErrorSchema:
+      properties:
+        detail:
+          type: string
+          title: Detail
+      type: object
+      required:
+      - detail
+      title: ErrorSchema
+    IsPartnerIntegrationExist:
+      properties:
+        is_integration_exist:
+          type: boolean
+          title: Is Integration Exist
+      type: object
+      required:
+      - is_integration_exist
+      title: IsPartnerIntegrationExist
+    CreatePartnerDTO:
+      properties:
+        title:
+          type: string
+          title: Title
+        account_id:
+          type: integer
+          title: Account Id
+      type: object
+      required:
+      - title
+      - account_id
+      title: CreatePartnerDTO
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ResponseSchema:
+      properties:
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+      - message
+      title: ResponseSchema
     ValidationError:
       properties:
         loc:
@@ -109,30 +280,49 @@ components:
       - msg
       - type
       title: ValidationError
-    IsPartnerIntegrationExist:
+    CreatePartnerResponse:
       properties:
-        is_integration_exist:
-          type: boolean
-          title: Is Integration Exist
-      type: object
-      required:
-      - is_integration_exist
-      title: IsPartnerIntegrationExist
-    HTTPValidationError:
-      properties:
-        detail:
-          items:
-            $ref: '#/components/schemas/ValidationError'
-          type: array
-          title: Detail
-      type: object
-      title: HTTPValidationError
-    ErrorSchema:
-      properties:
-        detail:
+        id:
           type: string
-          title: Detail
+          format: uuid
+          title: Id
+        client_secret:
+          type: string
+          title: Client Secret
+        title:
+          type: string
+          title: Title
+        account_id:
+          type: integer
+          title: Account Id
       type: object
       required:
-      - detail
-      title: ErrorSchema
+      - id
+      - client_secret
+      - title
+      - account_id
+      title: CreatePartnerResponse
+    CreatePartnerTokenDTO:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        client_secret:
+          type: string
+          format: uuid
+          title: Client Secret
+      type: object
+      required:
+      - id
+      - client_secret
+      title: CreatePartnerTokenDTO
+    PartnerTokenDTO:
+      properties:
+        access_token:
+          type: string
+          title: Access Token
+      type: object
+      required:
+      - access_token
+      title: PartnerTokenDTO
